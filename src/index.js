@@ -24,12 +24,6 @@ const resolvers = {
     info: () => 'This is the API of a Hackernews Clone',
     feed: () => links,
   },
-
-  Link: {
-    id: (parent) => parent.id,
-    description: (parent) => parent.description,
-    url: (parent) => parent.url,
-  }
 }
 
 const server = new GraphQLServer({
