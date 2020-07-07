@@ -1,52 +1,47 @@
 const { GraphQLServer } = require('graphql-yoga')
-const { PrismaClient } = requires('@prisma/client')
-
-let links = [{
-  id: 'link-0',
-  url: 'www.howtographql.com',
-  description: 'Fullstack tutorial for GraphQL'
-}]
-
-let idCount = links.length
+const { PrismaClient } = require('@prisma/client')
 
 const resolvers = {
   Query: {
     info: () => 'This is the API of a Hackernews Clone',
-    feed: () => links,
-    link: (parent, args) => {
-      return links.find(link => link.id === args.id)
+
+    feed: async (parent, args, context) => {
+      return context.prisma.link.findMany()
+    },
+
+    link: async (parent, args, context) => {
+      return context.prisma.link.findOne({
+        where: { id: parseInt(args.id) },
+      })
     },
   },
+
   Mutation: {
-    post: (parent, args) => {
-      const link = {
-        id: `link-${idCount++}`,
-        description: args.description,
-        url: args.url,
-      }
-      links.push(link)
-      return link
+    post: (parent, args, context) => {
+      const newLink = context.prisma.link.create({
+        data: {
+          url: args.url,
+          description: args.description,
+        },
+      })
+      return newLink
     },
-    updateLink: (parent, args) => {
-      const updatedLink = {
-        id: args.id,
-        description: args.description,
-        url: args.url
-      }
-      let foundLink = links.find(link => link.id === updatedLink.id)
-      if (foundLink) {
-        foundLink = updatedLink
-        return foundLink
-      }
+
+    updateLink: (parent, args, context) => {
+      return context.prisma.link.update({
+        data: {
+          id: parseInt(args.id),
+          description: args.description,
+          url: args.url,
+        },
+        where: { id: parseInt(args.id) }
+      })
     },
-    deleteLink: (parent, args) => {
-      for (let i = 0; i < links.length; i++) {
-        if (links[i].id === args.id) {
-          const deletedLink = links[i]
-          links.splice(i, 1)
-          return deletedLink
-        }
-      }
+
+    deleteLink: (parent, args, context) => {
+      return context.prisma.link.delete({
+        where: { id: parseInt(args.id) },
+      })
     }
   }
 }
