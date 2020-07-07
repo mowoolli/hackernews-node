@@ -1,4 +1,5 @@
 const { GraphQLServer } = require('graphql-yoga')
+const { PrismaClient } = requires('@prisma/client')
 
 let links = [{
   id: 'link-0',
@@ -50,8 +51,13 @@ const resolvers = {
   }
 }
 
+const prisma = new PrismaClient()
+
 const server = new GraphQLServer({
   typeDefs: './src/schema.graphql',
+  context: {
+    prisma
+  },
   resolvers,
 })
 server.start(() => console.log(`Server is running on http://localhost:4000`))
