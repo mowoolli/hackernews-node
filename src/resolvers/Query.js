@@ -13,6 +13,8 @@ async function feed(parent, args, context, info) {
 
   return await context.prisma.link.findMany({
     where,
+    skip: args.skip,
+    take: args.take,
   })
 }
 
